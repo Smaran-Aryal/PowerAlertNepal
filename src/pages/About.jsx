@@ -1,4 +1,6 @@
 import React, { useState } from 'react'
+import * as contactService from '../services/contact.service'
+import { getErrorMessage } from '../utils/errorHandler'
 
 const aboutCards = [
   {
@@ -29,6 +31,8 @@ export default function About() {
   const [form, setForm] = useState({ name: '', email: '', message: '' })
   const [errors, setErrors] = useState({})
   const [success, setSuccess] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState('')
 
   function validate() {
     const e = {}
@@ -45,14 +49,24 @@ export default function About() {
     setErrors(prev => ({ ...prev, [e.target.name]: '' }))
   }
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault()
     const e2 = validate()
     if (Object.keys(e2).length > 0) { setErrors(e2); return }
-    setSuccess(true)
-    setForm({ name: '', email: '', message: '' })
-    setErrors({})
-    setTimeout(() => setSuccess(false), 4000)
+
+    setSubmitError('')
+    setIsSubmitting(true)
+    try {
+      await contactService.sendContactMessage(form)
+      setSuccess(true)
+      setForm({ name: '', email: '', message: '' })
+      setErrors({})
+      setTimeout(() => setSuccess(false), 4000)
+    } catch (err) {
+      setSubmitError(getErrorMessage(err))
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -89,6 +103,12 @@ export default function About() {
               {success && (
                 <div className="mb-5 bg-green-50 border border-green-200 text-green-700 text-sm rounded-lg px-4 py-3">
                   Message sent. We will get back to you within 24 hours.
+                </div>
+              )}
+
+              {submitError && (
+                <div className="mb-5 bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3">
+                  {submitError}
                 </div>
               )}
 
@@ -134,9 +154,10 @@ export default function About() {
 
                 <button
                   type="submit"
-                  className="w-full py-3 bg-brand-purple hover:bg-brand-purple-dark text-white font-bold rounded-lg transition-colors text-sm"
+                  disabled={isSubmitting}
+                  className="w-full py-3 bg-brand-purple hover:bg-brand-purple-dark text-white font-bold rounded-lg transition-colors text-sm disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  Send Message
+                  {isSubmitting ? 'Sending...' : 'Send Message'}
                 </button>
               </form>
             </div>
