@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react'
 import * as reportService from '../services/report.service'
 import { getErrorMessage } from '../utils/errorHandler'
 import CitizenSurfaceCard from '../components/citizen/CitizenSurfaceCard'
+import SkeletonReportCard from '../components/SkeletonReportCard'
 
 const STATUS_FILTERS = ['all', 'Verified', 'Resolved']
 const PAGE_LIMIT = 100
@@ -143,36 +144,37 @@ export default function Alerts() {
 
         <CitizenSurfaceCard className="mb-8 bg-white/10 p-4">
           <div className="flex flex-col gap-3 sm:flex-row">
-          <input
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search by area, ward, district, or outage type..."
-            className="flex-1 rounded-2xl border border-white/10 bg-[#0F244F] px-4 py-3 text-sm text-white outline-none placeholder:text-slate-400 focus:border-auth-cyan-charge focus:ring-2 focus:ring-auth-cyan-charge/20"
-          />
-          <div className="flex flex-wrap gap-2">
-            {STATUS_FILTERS.map((status) => (
-              <button
-                key={status}
-                type="button"
-                onClick={() => setStatusFilter(status)}
-                className={`rounded-lg border px-4 py-2 text-sm font-semibold capitalize transition-colors ${
-                  statusFilter === status
-                    ? 'border-auth-cyan-charge bg-auth-cyan-charge text-white'
-                    : 'border-white/10 bg-white/5 text-slate-200 hover:border-auth-cyan-charge hover:text-white'
-                }`}
-              >
-                {status}
-              </button>
-            ))}
-          </div>
+            <input
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search by area, ward, district, or outage type..."
+              className="flex-1 rounded-2xl border border-white/10 bg-[#0F244F] px-4 py-3 text-sm text-white outline-none placeholder:text-slate-400 focus:border-auth-cyan-charge focus:ring-2 focus:ring-auth-cyan-charge/20"
+            />
+            <div className="flex flex-wrap gap-2">
+              {STATUS_FILTERS.map((status) => (
+                <button
+                  key={status}
+                  type="button"
+                  onClick={() => setStatusFilter(status)}
+                  className={`rounded-lg border px-4 py-2 text-sm font-semibold capitalize transition-colors ${statusFilter === status
+                      ? 'border-auth-cyan-charge bg-auth-cyan-charge text-white'
+                      : 'border-white/10 bg-white/5 text-slate-200 hover:border-auth-cyan-charge hover:text-white'
+                    }`}
+                >
+                  {status}
+                </button>
+              ))}
+            </div>
           </div>
         </CitizenSurfaceCard>
 
         {isLoading ? (
-          <CitizenSurfaceCard className="p-8 text-center text-sm text-slate-300">
-            Loading outage reports...
-          </CitizenSurfaceCard>
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <SkeletonReportCard key={i} />
+            ))}
+          </div>
         ) : error ? (
           <CitizenSurfaceCard className="border-red-400/20 bg-red-400/10 p-8 text-center text-red-100">
             <p className="text-sm">{error}</p>
